@@ -89,9 +89,10 @@ while True:
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
 
     # --- Show live video window ---
-    cv2.imshow('Original (400x400) mit Detektion', output_visualization_frame)
-    cv2.imshow('Rote Maske (Roh)', red_mask)
-    cv2.imshow('Prozessierte Maske (fuer Konturen)', processed_mask)
+    cv2.imshow('1: original', display_image)
+    cv2.imshow('4: Detected objects', output_visualization_frame)
+    cv2.imshow('2: Isolate red pixels', red_mask)
+    cv2.imshow('3: further processing', processed_mask)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
