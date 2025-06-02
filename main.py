@@ -1,3 +1,12 @@
+# Use this script with:
+# ```
+# sudo WAYLAND_DISPLAY=$WAYLAND_DISPLAY \
+#      XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR \
+#      QT_QPA_PLATFORM=wayland \
+#      python3.11 script_name.py
+# ```
+# Otherwise it will not work.
+
 import cv2
 import numpy as np
 import time
@@ -90,12 +99,6 @@ if __name__ == "__main__":
         }
         
         print(f"Try to create a virtual controller: {_DEVICE_NAME}...")
-        ui = UInput(capabilities, 
-                     name=_DEVICE_NAME, 
-                     vendor=_VENDOR_ID, 
-                     product=_PRODUCT_ID, 
-                     version=_VERSION,
-                     bustype=e.BUS_USB)
         
         print("This script requires root privileges")
         
@@ -180,6 +183,8 @@ if __name__ == "__main__":
             elif not object_centers_x:
                 current_opencv_x_pos = OPENCV_MAX_X / 2.0
 
+            print(f"UPDATE: current_opencv_x_pos = {current_opencv_x_pos}")
+
             # --- Joystick emulation update ---
             joystick_x_axis_value = map_opencv_to_joystick(current_opencv_x_pos, OPENCV_MIN_X, OPENCV_MAX_X)
             
@@ -195,7 +200,7 @@ if __name__ == "__main__":
 
             # --- Show live video window ---
             # cv2.imshow('1: original', display_image)
-            # cv2.imshow('4: Detected objects', output_visualization_frame)
+            cv2.imshow('Detected objects', output_visualization_frame)
             # cv2.imshow('2: Isolate red pixels', red_mask)
             # cv2.imshow('3: further processing', processed_mask)
 
