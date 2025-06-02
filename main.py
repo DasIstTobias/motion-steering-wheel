@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 import time
-from evdev import UInput, ecodes as e
+from evdev import UInput, AbsInfo
+from evdev import ecodes as e
 
 # --- Configuration ---
 
@@ -57,27 +58,45 @@ if __name__ == "__main__":
 
     try:
         # --- setup Virtual joystick ---
-        # Define the capabilities of the virtual controller
+        _DEVICE_NAME = "TestJoyMinimal" # Oder später "Xbox Wireless Controller"
+        _VENDOR_ID = 0x045e
+        _PRODUCT_ID = 0x028e # Oder später deine 0x02ea
+        _VERSION = 0x111    # Oder später deine 0x1
+        
+        print("DEBUG: Defining full controller capabilities using AbsInfo")
         capabilities = {
-            e.EV_KEY: [
+            e.EV_KEY: [ # Buttons bleiben gleich
                 e.BTN_A, e.BTN_B, e.BTN_X, e.BTN_Y,
-                e.BTN_TL, e.BTN_TR, e.BTN_TL2, e.BTN_TR2,
+                e.BTN_TL, e.BTN_TR, e.BTN_TL2, e.BTN_TR2, # Beachte: BTN_TL2/TR2 sind oft als Buttons, wenn ABS_Z/RZ die analogen Trigger sind
                 e.BTN_SELECT, e.BTN_START, e.BTN_MODE,
                 e.BTN_THUMBL, e.BTN_THUMBR
             ],
             e.EV_ABS: [
-                (e.ABS_X, (JOYSTICK_MIN, JOYSTICK_MAX, 0, 0)), # Left stick X
-                (e.ABS_Y, (JOYSTICK_MIN, JOYSTICK_MAX, 0, 0)), # Left stick Y
-                (e.ABS_RX, (JOYSTICK_MIN, JOYSTICK_MAX, 0, 0)),# Right stick X
-                (e.ABS_RY, (JOYSTICK_MIN, JOYSTICK_MAX, 0, 0)),# Right stick Y
-                (e.ABS_Z, (0, 1023, 0, 0)), # Left trigger (LT)
-                (e.ABS_RZ, (0, 1023, 0, 0)), # Right trigger (RT)
-                (e.ABS_HAT0X, (-1, 1, 0, 0)), # D-Pad X
-                (e.ABS_HAT0Y, (-1, 1, 0, 0))  # D-Pad Y
+                (e.ABS_X, AbsInfo(value=0, min=-32767, max=32767, fuzz=16, flat=32, resolution=0)), # value=JOYSTICK_CENTER
+                (e.ABS_Y, AbsInfo(value=0, min=-32767, max=32767, fuzz=16, flat=32, resolution=0)), # Linker Stick Y
+                
+                (e.ABS_RX, AbsInfo(value=0, min=-32767, max=32767, fuzz=16, flat=32, resolution=0)),# Rechter Stick X
+                (e.ABS_RY, AbsInfo(value=0, min=-32767, max=32767, fuzz=16, flat=32, resolution=0)),# Rechter Stick Y
+                
+                # Analoge Trigger (LT, RT)
+                (e.ABS_Z, AbsInfo(value=0, min=0, max=1023, fuzz=0, flat=0, resolution=0)),  # Linker Trigger (LT)
+                (e.ABS_RZ, AbsInfo(value=0, min=0, max=1023, fuzz=0, flat=0, resolution=0)), # Rechter Trigger (RT)
+                
+                # D-Pad (oft als HAT-Switches, aber als ABS auch möglich)
+                (e.ABS_HAT0X, AbsInfo(value=0, min=-1, max=1, fuzz=0, flat=0, resolution=0)), # D-Pad X
+                (e.ABS_HAT0Y, AbsInfo(value=0, min=-1, max=1, fuzz=0, flat=0, resolution=0))  # D-Pad Y
             ],
-            e.EV_MSC: [e.MSC_SCAN],
+            e.EV_MSC: [e.MSC_SCAN], # Wenn nötig
         }
-        print(f"Try to create a virtual controller: {DEVICE_NAME}...")
+        
+        print(f"Try to create a virtual controller: {_DEVICE_NAME}...")
+        ui = UInput(capabilities, 
+                     name=_DEVICE_NAME, 
+                     vendor=_VENDOR_ID, 
+                     product=_PRODUCT_ID, 
+                     version=_VERSION,
+                     bustype=e.BUS_USB)
+        
         print("This script requires root privileges")
         
         ui = UInput(capabilities, name=DEVICE_NAME, vendor=VENDOR_ID, product=PRODUCT_ID, version=0x1)
@@ -175,10 +194,10 @@ if __name__ == "__main__":
             print(f"OpenCV X: {current_opencv_x_pos:6.1f} (Range {OPENCV_MIN_X}-{OPENCV_MAX_X}) -> Joystick X: {joystick_x_axis_value:6} (Range {JOYSTICK_MIN}-{JOYSTICK_MAX})  ", end='\r')
 
             # --- Show live video window ---
-            cv2.imshow('1: original', display_image)
-            cv2.imshow('4: Detected objects', output_visualization_frame)
-            cv2.imshow('2: Isolate red pixels', red_mask)
-            cv2.imshow('3: further processing', processed_mask)
+            # cv2.imshow('1: original', display_image)
+            # cv2.imshow('4: Detected objects', output_visualization_frame)
+            # cv2.imshow('2: Isolate red pixels', red_mask)
+            # cv2.imshow('3: further processing', processed_mask)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 print("\n'q' pressed, exiting...")
