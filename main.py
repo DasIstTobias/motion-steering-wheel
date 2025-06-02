@@ -35,9 +35,8 @@ UPPER_RED2 = np.array([180, 255, 255])  # H_max, S_max, V_max
 MORPH_KERNEL_SIZE = (7, 7) # Kernel for morphological operations
 kernel = np.ones(MORPH_KERNEL_SIZE, np.uint8)
 
-# Alternative Product ID: 0x02dd
 VENDOR_ID = 0x045e
-PRODUCT_ID = 0x02ea
+PRODUCT_ID = 0x02dd
 DEVICE_NAME = "Xbox Wireless Controller"
 
 OPENCV_MIN_X = 0.0
@@ -66,36 +65,34 @@ if __name__ == "__main__":
     cap = None
 
     try:
-        # --- setup Virtual joystick ---
-        _DEVICE_NAME = "TestJoyMinimal" # Oder später "Xbox Wireless Controller"
+        # --- Setup Virtual Controller ---
+        _DEVICE_NAME = "Xbox Wireless Controller"
         _VENDOR_ID = 0x045e
-        _PRODUCT_ID = 0x028e # Oder später deine 0x02ea
-        _VERSION = 0x111    # Oder später deine 0x1
+        _PRODUCT_ID = 0x02dd
+        _VERSION = 0x1
         
         print("DEBUG: Defining full controller capabilities using AbsInfo")
         capabilities = {
-            e.EV_KEY: [ # Buttons bleiben gleich
+            e.EV_KEY: [
                 e.BTN_A, e.BTN_B, e.BTN_X, e.BTN_Y,
-                e.BTN_TL, e.BTN_TR, e.BTN_TL2, e.BTN_TR2, # Beachte: BTN_TL2/TR2 sind oft als Buttons, wenn ABS_Z/RZ die analogen Trigger sind
+                e.BTN_TL, e.BTN_TR, e.BTN_TL2, e.BTN_TR2,
                 e.BTN_SELECT, e.BTN_START, e.BTN_MODE,
                 e.BTN_THUMBL, e.BTN_THUMBR
             ],
             e.EV_ABS: [
                 (e.ABS_X, AbsInfo(value=0, min=-32767, max=32767, fuzz=16, flat=32, resolution=0)), # value=JOYSTICK_CENTER
-                (e.ABS_Y, AbsInfo(value=0, min=-32767, max=32767, fuzz=16, flat=32, resolution=0)), # Linker Stick Y
+                (e.ABS_Y, AbsInfo(value=0, min=-32767, max=32767, fuzz=16, flat=32, resolution=0)), # Left Stick Y
                 
-                (e.ABS_RX, AbsInfo(value=0, min=-32767, max=32767, fuzz=16, flat=32, resolution=0)),# Rechter Stick X
-                (e.ABS_RY, AbsInfo(value=0, min=-32767, max=32767, fuzz=16, flat=32, resolution=0)),# Rechter Stick Y
+                (e.ABS_RX, AbsInfo(value=0, min=-32767, max=32767, fuzz=16, flat=32, resolution=0)),# Right Stick X
+                (e.ABS_RY, AbsInfo(value=0, min=-32767, max=32767, fuzz=16, flat=32, resolution=0)),# Right Stick Y
                 
-                # Analoge Trigger (LT, RT)
-                (e.ABS_Z, AbsInfo(value=0, min=0, max=1023, fuzz=0, flat=0, resolution=0)),  # Linker Trigger (LT)
-                (e.ABS_RZ, AbsInfo(value=0, min=0, max=1023, fuzz=0, flat=0, resolution=0)), # Rechter Trigger (RT)
+                (e.ABS_Z, AbsInfo(value=0, min=0, max=1023, fuzz=0, flat=0, resolution=0)),  # Left Trigger (LT)
+                (e.ABS_RZ, AbsInfo(value=0, min=0, max=1023, fuzz=0, flat=0, resolution=0)), # Right Trigger (RT)
                 
-                # D-Pad (oft als HAT-Switches, aber als ABS auch möglich)
                 (e.ABS_HAT0X, AbsInfo(value=0, min=-1, max=1, fuzz=0, flat=0, resolution=0)), # D-Pad X
                 (e.ABS_HAT0Y, AbsInfo(value=0, min=-1, max=1, fuzz=0, flat=0, resolution=0))  # D-Pad Y
             ],
-            e.EV_MSC: [e.MSC_SCAN], # Wenn nötig
+            e.EV_MSC: [e.MSC_SCAN],
         }
         
         print(f"Try to create a virtual controller: {_DEVICE_NAME}...")
@@ -182,8 +179,6 @@ if __name__ == "__main__":
                  pass
             elif not object_centers_x:
                 current_opencv_x_pos = OPENCV_MAX_X / 2.0
-
-            print(f"UPDATE: current_opencv_x_pos = {current_opencv_x_pos}")
 
             # --- Joystick emulation update ---
             joystick_x_axis_value = map_opencv_to_joystick(current_opencv_x_pos, OPENCV_MIN_X, OPENCV_MAX_X)
